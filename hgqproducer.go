@@ -7,10 +7,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v7"
 )
 
-func main()  {
+func main() {
 	fmt.Println("这个是生产者")
 
 	client := redis.NewClient(&redis.Options{
@@ -22,11 +22,12 @@ func main()  {
 	pong, err := client.Ping().Result()
 	fmt.Println(pong, err)
 
-	client.Set("SimonHuangTest","OK",0)
-	val, err := client.Get("SimonHuangTest").Result();
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("SimonHuangTest", val)
+	pubsub := client.PSubscribe("mychannel*")
+	fmt.Println(pubsub)
 
+	for i := 0; i < 100; i++ {
+		client.Publish("mychannel1", i)
+	}
+
+	client.Close()
 }
